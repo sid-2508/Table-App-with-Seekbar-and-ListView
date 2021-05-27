@@ -2,74 +2,95 @@ package com.siddharth.practice;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
+import android.media.AudioManager;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.GridLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.MediaController;
+import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.VideoView;
+
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class MainActivity extends AppCompatActivity {
 
-    int player = 0;
-    int[] state = {2,2,2,2,2,2,2,2,2};
-    int[][] winnerState = {{0,1,2},{3,4,5},{6,7,8},{0,3,6},{1,4,7},{2,5,8},{0,4,8},{2,4,6}};
-    boolean active = true;
+    MediaPlayer mediaPlayer;
+    AudioManager audioManager;
 
-    public void token(View view) {
-        ImageView tokens = (ImageView) view;
-        int posClick = Integer.parseInt(tokens.getTag().toString());
-        if (state[posClick] == 2 && active)
-        {
-            tokens.setTranslationY(-1000f);
-            if (player == 0) {
-                tokens.setImageResource(R.drawable.cross);
-                tokens.animate().translationYBy(1000f).setDuration(300);
-                player = 1;
-                state[posClick] = player;
-            } else
-                {
-                tokens.setImageResource(R.drawable.circle);
-                tokens.animate().translationYBy(1000f).setDuration(300);
-                player = 0;
-                state[posClick] = player;
-            }
-            for(int[] winner : winnerState )
-            {
-                if(state[winner[0]] == state[winner[1]] && state[winner[0]] == state[winner[2]] && state[winner[0]] != 2) {
-                    LinearLayout win = (LinearLayout)findViewById(R.id.winnerMessage);
-                    win.setVisibility(View.VISIBLE);
-                    TextView mes = (TextView)findViewById(R.id.message);
-                    mes.setText("Player " + player + " has won");
-                    active = false;
-                }
-            }
-        }
+    public void playAudio(View view){
+        mediaPlayer.start();
     }
 
-    public void play(View view){
-        LinearLayout linearLayout = (LinearLayout)findViewById(R.id.winnerMessage);
-        linearLayout.setVisibility(View.INVISIBLE);
-        player = 0;
-        active = true;
-        int i;
-        for(i=0 ; i<state.length;i++)
-        {
-         state[i] = 2;
-        }
-        GridLayout gridLayout = (GridLayout)findViewById(R.id.gridLayout);
-
-        for (i = 0; i< gridLayout.getChildCount(); i++) {
-
-            ((ImageView) gridLayout.getChildAt(i)).setImageResource(0);
-
-        }
+    public void pauseAudio(View view){
+        mediaPlayer.pause();
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        mediaPlayer = MediaPlayer.create(this , R.raw.song);
+
+        audioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
+        int maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+        int curVolume = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
+
+        SeekBar seekBar = (SeekBar)findViewById(R.id.seekBar);
+        seekBar.setMax(maxVolume);
+        seekBar.setProgress(curVolume);
+
+        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                audioManager.setStreamVolume(AudioManager.STREAM_MUSIC , progress , 0);
+
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
+
+        final SeekBar seekbar2 = (SeekBar)findViewById(R.id.seekBar2);
+        seekbar2.setMax(mediaPlayer.getDuration());
+
+        new Timer().scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                seekbar2.setProgress((mediaPlayer.getCurrentPosition()));
+            }
+        },0,10000);
+
+        seekbar2.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                mediaPlayer.seekTo(progress);
+
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
 
     }
 }
