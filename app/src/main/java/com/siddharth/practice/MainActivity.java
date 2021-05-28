@@ -20,77 +20,23 @@ import java.util.TimerTask;
 
 public class MainActivity extends AppCompatActivity {
 
-    MediaPlayer mediaPlayer;
-    AudioManager audioManager;
+public void playAudio(View view){
 
-    public void playAudio(View view){
-        mediaPlayer.start();
-    }
+    int btnid = view.getId();
 
-    public void pauseAudio(View view){
-        mediaPlayer.pause();
-    }
+    String buttonID = view.getResources().getResourceEntryName(btnid);
+
+    int resourceId = view.getResources().getIdentifier(buttonID , "raw" , "com.siddharth.practice");
+
+    MediaPlayer mediaPlayer = MediaPlayer.create(this , resourceId);
+    mediaPlayer.start();
+}
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mediaPlayer = MediaPlayer.create(this , R.raw.song);
-
-        audioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
-        int maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
-        int curVolume = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
-
-        SeekBar seekBar = (SeekBar)findViewById(R.id.seekBar);
-        seekBar.setMax(maxVolume);
-        seekBar.setProgress(curVolume);
-
-        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                audioManager.setStreamVolume(AudioManager.STREAM_MUSIC , progress , 0);
-
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-
-            }
-        });
-
-        final SeekBar seekbar2 = (SeekBar)findViewById(R.id.seekBar2);
-        seekbar2.setMax(mediaPlayer.getDuration());
-
-        new Timer().scheduleAtFixedRate(new TimerTask() {
-            @Override
-            public void run() {
-                seekbar2.setProgress((mediaPlayer.getCurrentPosition()));
-            }
-        },0,10000);
-
-        seekbar2.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                mediaPlayer.seekTo(progress);
-
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-
-            }
-        });
 
     }
 }
